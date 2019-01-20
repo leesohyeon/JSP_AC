@@ -1,0 +1,105 @@
+< 실습 >
+1. jsp010930we/jsppassword 로 접속
+CONN jsp010930we/jsppassword;
+
+2. Pokemon 테이블 만들기 
+	항목 : 번호(num), 이름(name), 레벨(lv), 체력(hp), 등록일자(regdate)
+CREATE TABLE pokemon(
+	num NUMBER,
+	name VARCHAR2(100),
+	lv NUMBER,
+	hp NUMBER,
+	regdate DATE
+);
+
+3. 레코드(데이터 추가) 최소 10개 
+INSERT INTO pokemon VALUES (1, '피카츄', 10, 10, SYSDATE);
+INSERT INTO pokemon VALUES (2, '라이츄', 7, 20, SYSDATE);
+INSERT INTO pokemon VALUES (3, '파이리', 100, 1000, SYSDATE);
+INSERT INTO pokemon VALUES (4, '꼬부기', 10, 100, SYSDATE);
+INSERT INTO pokemon VALUES (5, '버터풀', 17, 1110, SYSDATE);
+INSERT INTO pokemon VALUES (6, '야도란', 13, 200, SYSDATE);
+INSERT INTO pokemon VALUES (7, '이상해씨', 20, 210, SYSDATE);
+INSERT INTO pokemon VALUES (8, '따라츄', 30, 250, SYSDATE);
+INSERT INTO pokemon VALUES (9, '피츄', 440, 10000, SYSDATE);
+INSERT INTO pokemon VALUES (10, '메타몽', 5, 120, SYSDATE);
+INSERT INTO pokemon VALUES (11, '치코리타', 3, 10, SYSDATE);
+COMMIT;
+
+4. '츄'로 끝나는 포켓몬의 모든 정보 출력 
+SELECT * FROM pokemon WHERE name LIKE '%츄';
+
+5. 레벨이 10이상인 포켓몬의 이름, 레벨, 체력 출력
+SELECT name, lv, hp FROM pokemon WHERE lv >= 10;
+
+6. 모든 포켓몬의 체력을 레벨 * 100으로 변경 
+UPDATE pokemon SET hp = lv * 100;
+
+7. 모든 포켓몬의 모든 정보 보기 
+SELECT * FROM pokemon;
+
+8. 모든 포켓몬의 이름, 레벨, 체력을 레벨 오름차순으로 보기 
+SELECT name, lv, hp FROM pokemon ORDER BY lv ASC;
+
+9. 체력이 500이상인 포켓몬들의 모든 정보를 이름 오름차순으로 보기 
+SELECT * FROM pokemon WHERE hp >= 500 ORDER BY name ASC;
+
+10. 레벨이 5이하인 포켓몬들의 레벨을 +10, 체력을 +1000 하기 
+UPDATE pokemon SET lv = lv + 10, hp = hp + 1000 WHERE lv <= 5;
+
+11. 이름이 '피카츄'인 포켓몬의 이름을 '라이츄'로 변경 
+UPDATE pokemon SET name = '라이츄' WHERE name = '피카츄';
+======================================================================
+< 시퀀스(sequence) >
+- 번호를 자동으로 붙여주는 객체 
+- 시퀀스 만들기 : CREATE SEQUENCE [시퀀스명] ([옵션1] [옵션2] ...);
+
+** 옵션 
+ START WITH [정수] : [정수]부터 번호 시작  ( 기본값 : 1 )
+ MAXVALUE [최댓값] : 시퀀스의 최댓값 
+ MINVALUE [최솟값] : 시퀀스의 최솟값 ( 기본값 : 1 )
+ CYCLE/NOCYCLE    : 최대치에 도달했을 때, 시작번호로 돌아갈 지 여부 ( 기본값 : NOCYCLE)
+ INCREMENT BY [정수] : 증가값 ( 기본값 : 1 )
+ CACHE [정수]/NOCACHE : 캐쉬(미리 번호를 만들어 두는 것) 설정 여부 ( 기본값 : CACHE 20 )
+ 
+- 포켓몬 레코드를 추가할 때, 자동으로 num에 번호를 매겨줄 시퀀스 생성
+CREATE SEQUENCE pok_seq START WITH 12 NOCACHE;
+
+- 시퀀스의 활용 
+==> 레코드를 추가할 때(INSERT INTO..) 번호를 넣고 싶은 부분에 [시퀀스명].NEXTVAL을 사용 
+예) 
+INSERT INTO pokemon VALUES( pok_seq.NEXTVAL , '뚜벅초', 10, 200, SYSDATE );  
+INSERT INTO pokemon VALUES( pok_seq.NEXTVAL , '망나뇽', 70, 1400, SYSDATE );  
+
+- [시퀀스명].NEXTVAL : 이 시퀀스의 현재 값을 넣고, 시퀀스의 번호를 1증가
+======================================================================
+< JDBC (Java Database Connector) >
+-> DB + 자바 연동할 때 쓰는 라이브러리
+
+1. 이클립스 압축 풀기
+ SE : 순수 자바 프로그램 
+ EE : JSP 만들 때 (<- 우리가 쓰는 거)
+
+2. 자바프로젝트 생성 : ch01_jdbc_포켓몬관리프로그램
+3. build path 설정 : jdbc 라이브러리 연동
+
+< 실습 >
+- 1번 포켓몬을 삭제하는 Quiz01 클래스 정의
+(com.pokemon.quiz -> Quiz01 클래스)
+sql : "DELETE FROM pokemon WHERE num = 1"
+
+- Quiz02 : Scanner를 사용하여 INSERT INTO 실행 
+ 포켓몬 이름, 체력을 입력 받고 
+ 레벨은 체력의 100배를 저장
+
+
+
+
+
+
+
+
+
+
+
+
