@@ -1,0 +1,55 @@
+< 학생 관리 프로그램 만들기 >
+1. 테이블 만들기 
+  (번호, 이름, 국, 영, 수, 평균, 학점, 등록일자)
+
+1-1. 전에 썼던 student 테이블 삭제 
+DROP TABLE student;     
+
+1-2. 다시 만들기 
+CREATE TABLE student (
+	num NUMBER PRIMARY KEY, -- 학생의 번호 
+	name VARCHAR2(40) NOT NULL, -- 이름
+	kr NUMBER DEFAULT 0 CHECK(kr >= 0 AND kr <= 100), -- 국어
+	en NUMBER DEFAULT 0 CHECK(en >= 0 AND en <= 100), -- 영어
+	ma NUMBER DEFAULT 0 CHECK(ma >= 0 AND ma <= 100), -- 수학
+	avg NUMBER,
+	grade VARCHAR2(1), 
+	regdate DATE DEFAULT SYSDATE
+);
+
+< 테이블 제약조건(Constaints) >
+-> 테이블에 레코드 삽입 시 검사하는 용도
+PRIMARY KEY : 우선키 (중복안되고, 누락되어도 안된다는 제약 조건 ==> 레코드의 대푯값, 주민등록번호같은 개념)
+NOT NULL : 누락되면 안되는 항목이다!
+DEFAULT [기본값] : 이 항목에 누락이 됐을 경우 넣을 기본값
+CHECK( 조건식 ) : 이 항목에 데이터가 들어갈 때 검사할 식
+UNIQUE : 중복되면 안된다. 
+
+** PRIMARY KEY 
+ -> UNIQUE + NOT NULL 의 특성을 가지고 있음
+ -> 레코드를 식별하는 고유값 (게시판의 글번호, 뉴스기사 글번호, 사람의 주민번호 등)
+ -> 테이블 당 1개의 항목에만 PRIMARY KEY를 선언할 수 있음
+
+2. 시퀀스 만들기
+CREATE SEQUENCE st_seq NOCACHE;
+
+3. 자바프로젝트 만들기 : ch02_학생관리프로그램
+
+
+4. 
+ 패키지 : com.student.main, com.student.util
+	
+ 클래스 : Util -> getConnection(), close() 만들기
+        Main 클래스 만들기
+ 
+5. Main클래스 
+ 메뉴: 
+	1. 학생 추가 ===> 이름, 국, 영, 수 입력 받고 평균, 학점 계산
+			번호는 시퀀스가 자동 지정, 등록일자는 sysdate로
+	2. 모든 학생 보기(성적순)
+	3. 모든 학생 보기(번호순)
+	4. 학생 검색 ===> 번호를 입력 받고 해당 학생의 모든 정보 출력
+	5. 1등 학생 보기
+	6. 학생 삭제 ===> 이름을 입력 받고 해당 이름을 가진 학생들의 이름, 번호 출력
+			-> 번호를 입력 받아 특정 학생 1명만 삭제 
+	0. 종료 

@@ -1,0 +1,218 @@
+package com.student.main;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.Scanner;
+
+import com.student.util.Util;
+
+public class Main {
+	Connection con;
+	PreparedStatement ps;
+	ResultSet rs;
+	String sql;
+	Scanner sc = new Scanner(System.in);
+	void insert() {
+		sql = "INSERT INTO student VALUES(st_seq.NEXTVAL, ?, ?, ?, ?, ?, ?, SYSDATE)";
+		String name;
+		int kr, en, ma;
+		double avg;
+		String grade;
+		
+		System.out.print("새 학생 이름 : ");
+		name = sc.next();
+		System.out.print("국어 : ");
+		kr = sc.nextInt();
+		System.out.print("영어 : ");
+		en = sc.nextInt();
+		System.out.print("수학 : ");
+		ma = sc.nextInt();
+		avg = (kr + en + ma) / 3.0;
+		switch( (int)avg / 10) {
+		case 10: case 9: 
+			grade = "A"; break;
+		case 8: 
+			grade = "B"; break;
+		case 7: 
+			grade = "C"; break;
+		case 6: 
+			grade = "D"; break;
+		default:
+			grade = "F";
+		}
+		
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setString(1, name);
+			ps.setInt(2, kr);
+			ps.setInt(3, en);
+			ps.setInt(4, ma);
+			ps.setDouble(5, avg);
+			ps.setString(6, grade);
+			if (ps.executeUpdate() == 1) { // 추가 완료
+				System.out.println("새 학생 추가 완료");
+			} else {
+				System.out.println("잘못된 데이터");
+			}
+		} catch(Exception e) {
+			
+		}
+	}
+	void select(boolean orderedByNum) {
+		sql = "SELECT * FROM student ORDER BY " + (orderedByNum ? "num ASC" : "avg DESC");
+		try {
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			System.out.println("번호\t이름\t국어\t영어\t수학\t평균\t등급\t등록일자");
+			while(rs.next()) {
+				System.out.print(rs.getInt("num") + "번\t");
+				System.out.print(rs.getString("name") + "\t");
+				System.out.print(rs.getInt("kr") + "\t");
+				System.out.print(rs.getInt("en") + "\t");
+				System.out.print(rs.getInt("ma") + "\t");
+				System.out.print(String.format("%.2f",rs.getDouble("avg")) + "\t");
+				System.out.print(rs.getString("grade") + "\t");
+				System.out.println(rs.getString("regdate"));
+			}
+		} catch(Exception e) {
+			System.out.println("에러! : " + e.getMessage());
+		}
+	}
+	void selectByNum() {
+		sql = "SELECT * FROM student WHERE num = ?";
+		int num;
+		System.out.print("검색할 학생의 번호 : ");
+		num = sc.nextInt();
+		try {
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, num);
+			rs = ps.executeQuery();
+			
+			System.out.println("번호\t이름\t국어\t영어\t수학\t평균\t등급\t등록일자");
+			if(rs.next()) {
+				System.out.print(rs.getInt("num") + "번\t");
+				System.out.print(rs.getString("name") + "\t");
+				System.out.print(rs.getInt("kr") + "\t");
+				System.out.print(rs.getInt("en") + "\t");
+				System.out.print(rs.getInt("ma") + "\t");
+				System.out.print(String.format("%.2f",rs.getDouble("avg")) + "\t");
+				System.out.print(rs.getString("grade") + "\t");
+				System.out.println(rs.getString("regdate"));
+			}
+			else {
+				System.out.println("미등록 학번입니다.");
+			}
+		} catch(Exception e) {
+			System.out.println("에러! : " + e.getMessage());
+		}
+	}
+	void selectTopStudent() {
+		sql = "SELECT * FROM student WHERE avg = (SELECT MAX(avg) FROM student)";
+		try {
+			ps = con.prepareStatement(sql);
+			rs = ps.executeQuery();
+			System.out.println("1등 학생 ");
+			System.out.println("번호\t이름\t평균\t등급");
+			if(rs.next()) {
+				System.out.print(rs.getInt("num") + "번\t");
+				System.out.print(rs.getString("name") + "\t");
+				System.out.print(String.format("%.2f",rs.getDouble("avg")) + "\t");
+				System.out.println(rs.getString("grade"));
+			}
+			else {
+				System.out.println("학생이 없습니다.");
+			}
+		} catch(Exception e) {
+			System.out.println("에러! : " + e.getMessage());
+		}
+	}
+	void delete() {
+		String preSql = "SELECT name, num FROM student WHERE name = ?"; 
+		System.out.print("삭제할 학생의 이름 : ");
+		try {
+			// 이름이 중복된 학생이 여러 명일 경우를 위해 일단 목록을 가져옴
+			String name = sc.next();
+			ps = con.prepareStatement(preSql);
+			ps.setString(1, name);
+			rs = ps.executeQuery();
+			System.out.println(name + " 학생 목록");
+			System.out.println("번호\t이름");
+			while(rs.next()) {
+				System.out.print(rs.getInt("num") + "번\t");
+				System.out.println(rs.getString("name"));
+			}
+			
+			// 학번 선택 받기
+			System.out.println("번호 선택 : ");
+			int num = sc.nextInt();
+			
+			// 입력된 학번으로 학생 삭제
+			sql = "DELETE FROM student WHERE num = ?"; 
+			ps = con.prepareStatement(sql);
+			ps.setInt(1, num);
+			if (ps.executeUpdate() == 1) {
+				System.out.println("삭제 완료");
+			} else {
+				System.out.println("삭제 실패");
+			}
+		} catch(Exception e) {
+			System.out.println("에러! : " + e.getMessage());
+		}
+	}
+
+	public Main() {
+
+		String menu = "---------<< 학생 관리 프로그램 >>---------\n"
+				+ "1. 학생 추가\n" 
+				+ "2. 모든 학생 보기(성적순)\n" 
+				+ "3. 모든 학생 보기(번호순)\n" 
+				+ "4. 학생 검색\n" 
+				+ "5. 1등 학생 보기\n"
+				+ "6. 학생 삭제\n" 
+				+ "0. 종료 ";
+		
+		int select;
+		try {
+			// DB 접속
+			con = Util.getConnection();
+
+			// 메뉴 실행
+			menu: while (true) {
+				System.out.println(menu);
+				System.out.print("입력 : ");
+				select = sc.nextInt();
+				switch (select) {
+				case 1:
+					insert();
+					break;
+				case 2:
+					select(false); // 성적순
+					break;
+				case 3:
+					select(true); // 번호순
+					break;
+				case 4:
+					selectByNum();
+					break;
+				case 5:
+					selectTopStudent();
+					break;
+				case 6:
+					delete();
+					break;
+				case 0:
+					break menu; // 반복문 종료 
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			Util.close(con, ps, rs);
+		}
+	}
+
+	public static void main(String[] args) {
+		new Main();
+	}
+}
